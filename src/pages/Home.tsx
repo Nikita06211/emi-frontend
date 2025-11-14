@@ -9,27 +9,12 @@ export default function Home() {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [columns, setColumns] = useState(4);
+  
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("id");
   const [sortOrder, setSortOrder] = useState("ASC");
 
-  useEffect(() => {
-    function getCols(width: number) {
-      if (width < 640) return 1; // small phones
-      if (width < 768) return 2; // small tablets
-      if (width < 1024) return 3; // tablets / small laptops
-      return 4; // desktops
-    }
-
-    function onResize() {
-      setColumns(getCols(window.innerWidth));
-    }
-
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  
 
   const loadProducts = async () => {
     try {
