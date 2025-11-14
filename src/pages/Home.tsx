@@ -61,75 +61,52 @@ export default function Home() {
       </h1>
 
       {/* Search and Filter Bar */}
-      <div style={{ display: "flex", gap: "16px", padding: "24px", flexWrap: "wrap", alignItems: "center" }}>
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          style={{
-            flex: "1",
-            minWidth: "250px",
-            padding: "10px 14px",
-            borderRadius: "6px",
-            border: "1px solid #444",
-            backgroundColor: "#1a1a1a",
-            color: "#fff",
-            fontSize: "14px",
-          }}
-        />
+      <div className="flex flex-wrap items-center gap-4 px-6 py-6">
+        <div className="w-full md:w-1/2">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18A7.5 7.5 0 1 1 18 10.5 7.5 7.5 0 0 1 10.5 18z"></path></svg>
+              <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-700 bg-[#1a1a1a] text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          style={{
-            padding: "10px 12px",
-            borderRadius: "6px",
-            border: "1px solid #444",
-            backgroundColor: "#1a1a1a",
-            color: "#fff",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
-          <option value="id">Sort by: Default</option>
-          <option value="price">Sort by: Price</option>
-          <option value="name">Sort by: Name</option>
-        </select>
+        <div className="flex gap-3">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-2 rounded-md border border-gray-700 bg-[#1a1a1a] text-white text-sm cursor-pointer"
+          >
+            <option value="id">Default</option>
+            <option value="price">Price</option>
+            <option value="name">Name</option>
+          </select>
 
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          style={{
-            padding: "10px 12px",
-            borderRadius: "6px",
-            border: "1px solid #444",
-            backgroundColor: "#1a1a1a",
-            color: "#fff",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}
-        >
-          <option value="ASC">Ascending</option>
-          <option value="DESC">Descending</option>
-        </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="px-3 py-2 rounded-md border border-gray-700 bg-[#1a1a1a] text-white text-sm cursor-pointer"
+          >
+            <option value="ASC">Ascending</option>
+            <option value="DESC">Descending</option>
+          </select>
+        </div>
       </div>
 
-      <div
-        className="grid"
-        style={{ display: "grid", gridTemplateColumns: `repeat(${columns}, minmax(220px, 1fr))`, gap: '32px', padding: '24px' }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 p-6">
         {products.length > 0 ? (
           products.map((p: any) => (
             <ProductCard key={p.id} product={p} />
           ))
         ) : (
-          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px 20px", color: "#999" }}>
-            No products found
-          </div>
+          <div className="col-span-full text-center py-10 text-gray-400">No products found</div>
         )}
       </div>
 

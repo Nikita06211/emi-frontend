@@ -1,138 +1,140 @@
 ﻿import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProductById } from "../api/productApi";
+import type { Product, Variant, EMIPlan } from "../types/Product";
 
 export default function ProductDetails() {
-	const { productId } = useParams();
-	const [product, setProduct] = useState<any>(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
-	const [mainImage, setMainImage] = useState<string>("");
-	const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+  const { productId } = useParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+  const [mainImage, setMainImage] = useState<string>("");
 
-	useEffect(() => {
-		setLoading(true);
-		setError(null);
-		getProductById(Number(productId))
-			.then((res) => {
-				setProduct(res);
-				setMainImage(res.imageUrl);
-			})
-			.catch((err) => setError(err.message || "Failed to load product"))
-			.finally(() => setLoading(false));
-	}, [productId]);
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    getProductById(Number(productId))
+      .then((res: any) => {
+        setProduct(res);
+        const firstImg = Array.isArray(res.images) && res.images.length > 0 ? res.images[0] : (res.imageUrl || "");
+        setMainImage(firstImg);
+        if (Array.isArray(res.variants) && res.variants.length > 0) {
+          setSelectedVariantId(res.variants[0].id);
+        }
+      })
+      .catch((err) => setError(err.message || "Failed to load product"))
+      .finally(() => setLoading(false));
+  }, [productId]);
 
-	useEffect(() => {
-		function handleResize() {
-			setIsSmallScreen(window.innerWidth < 768);
-		}
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
+  if (loading)
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] text-white p-6">Loading...</div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] text-red-400 p-6">Error: {error}</div>
+    );
+  if (!product)
+    return <div className="min-h-screen bg-[#0D0D0D] text-white p-6">No product found</div>;
 
-	if (loading) return <div style={{ color: "#fff", padding: "20px", backgroundColor: "#0D0D0D", minHeight: "100vh" }}>Loading...</div>;
-	if (error) return <div style={{ color: "#ff6b6b", padding: "20px", backgroundColor: "#0D0D0D", minHeight: "100vh" }}>Error: {error}</div>;
-	if (!product) return <div style={{ color: "#fff", padding: "20px", backgroundColor: "#0D0D0D", minHeight: "100vh" }}>No product found</div>;
+  const emiPlans: EMIPlan[] = Array.isArray(product.emiPlans) ? product.emiPlans : [];
+  const variants: Variant[] = Array.isArray(product.variants) ? product.variants : [];
+  const selectedVariant = variants.find((v) => v.id === selectedVariantId) || variants[0] || null;
 
-	// safe access to emiPlans
-	const emiPlans = Array.isArray(product.emiPlans) ? product.emiPlans : [];
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
 
-	return (
-		<div style={{ backgroundColor: "#0D0D0D", color: "#fff", minHeight: "100vh", padding: "24px" }}>
-			<div style={{ display: "grid", gridTemplateColumns: isSmallScreen ? "1fr" : "1fr 1fr", gap: isSmallScreen ? "24px" : "48px", maxWidth: "1200px", margin: "0 auto" }}>
-				{/* Left: Product Image and Info */}
-				<div>
-					<div style={{ backgroundColor: "#1f1f1f", borderRadius: "12px", padding: "20px", marginBottom: "20px" }}>
-						<img src={mainImage} alt={product.name} style={{ width: "100%", maxHeight: "400px", objectFit: "contain", borderRadius: "8px" }} />
-					</div>
+  return (
+    <div className="min-h-screen bg-[#0D0D0D] text-white p-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Left: Image + Thumbs */}
+        <div>
+          <div className="bg-gray-900 rounded-lg p-6 mb-6">
+            <img src={mainImage} alt={product.name} className="w-full max-h-[480px] object-contain rounded-md" />
+          </div>
 
-					{/* Thumbnails */}
-					<div style={{ display: "flex", gap: "12px", overflowX: "auto" }}>
-						<div
-							onClick={() => setMainImage(product.imageUrl)}
-							style={{
-								width: "60px",
-								height: "60px",
-								minWidth: "60px",
-								backgroundColor: "#1f1f1f",
-								borderRadius: "8px",
-								padding: "4px",
-								cursor: "pointer",
-								border: mainImage === product.imageUrl ? "2px solid #2b6cff" : "1px solid #333",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-							}}
-						>
-							<img src={product.imageUrl} alt="thumb" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
-						</div>
+          <div className="flex gap-3 overflow-x-auto mb-6">
+            {Array.isArray(product.images) && product.images.length > 0 ? (
+              product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setMainImage(img)}
+                  className={`w-14 h-14 min-w-[56px] rounded-md p-1 flex items-center justify-center ${mainImage === img ? "ring-2 ring-blue-500" : "border border-gray-700"} bg-gray-900`}
+                >
+                  <img src={img} alt={`thumb-${idx}`} className="max-w-full max-h-full object-contain" />
+                </button>
+              ))
+            ) : (
+              <div className="w-14 h-14 min-w-[56px] rounded-md border border-gray-700 bg-gray-900 flex items-center justify-center">
+                <span className="text-xs text-gray-400">No Images</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-						{/* Additional placeholders for more thumbnails if needed */}
-						{[...Array(3)].map((_, i) => (
-							<div
-								key={i}
-								style={{
-									width: "60px",
-									height: "60px",
-									minWidth: "60px",
-									backgroundColor: "#1f1f1f",
-									borderRadius: "8px",
-									border: "1px solid #333",
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center",
-									cursor: "pointer",
-								}}
-							>
-								<span style={{ fontSize: "12px", color: "#666" }}>Img</span>
-							</div>
-						))}
-					</div>
+        {/* Right: Info + Variant + EMI Plans */}
+        <div>
+          <h2 className="text-2xl font-bold mb-2">{product.name}</h2>
+          <p className="text-sm text-gray-400 mb-4">{product.category}</p>
 
-					{/* Product Info */}
-					<div style={{ marginTop: "24px" }}>
-						<h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 8px 0" }}>{product.name}</h1>
-						<p style={{ color: "#9aa0a6", margin: "0 0 16px 0" }}>{product.variant}</p>
-						<p style={{ textDecoration: "line-through", color: "#8a8f95", margin: "0 0 4px 0" }}>₹{product.mrp}</p>
-						<p style={{ fontSize: "18px", fontWeight: "800", margin: 0 }}>₹{product.price}</p>
-					</div>
-				</div>
+          <div className="flex items-baseline gap-4 mb-4">
+            <div className="text-2xl font-extrabold">₹{displayPrice}</div>
+            <div className="text-sm line-through text-gray-500">₹{product.mrp}</div>
+          </div>
 
-				{/* Right: EMI Plans */}
-				<div>
-					<h2 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "16px" }}>EMI Plans</h2>
-					<div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
-						{emiPlans.length > 0 ? (
-							emiPlans.map((plan: any) => (
-								<div
-									key={plan.id}
-									onClick={() => setSelectedPlanId(plan.id)}
-									style={{
-										border: selectedPlanId === plan.id ? "2px solid #2b6cff" : "1px solid #333",
-										padding: "16px",
-										borderRadius: "8px",
-										cursor: "pointer",
-										backgroundColor: selectedPlanId === plan.id ? "rgba(43, 108, 255, 0.1)" : "#1a1a1a",
-										transition: "all 200ms ease",
-									}}
-								>
-									<p style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 6px 0" }}>Monthly: ₹{typeof plan.monthlyPayment === "number" ? plan.monthlyPayment.toFixed(0) : Number(plan.monthlyPayment).toFixed(0)}</p>
-									<p style={{ color: "#9aa0a6", fontSize: "14px", margin: "0 0 4px 0" }}>Tenure: {plan.tenureMonths} months</p>
-									<p style={{ color: "#9aa0a6", fontSize: "14px", margin: 0 }}>Interest: {plan.interestRate}%</p>
-									{plan.cashback && <p style={{ color: "#51cf66", fontSize: "14px", margin: "6px 0 0 0" }}>{plan.cashback}</p>}
-								</div>
-							))
-						) : (
-							<p style={{ color: "#9aa0a6" }}>No EMI plans available</p>
-						)}
-					</div>
+          {/* Variant selection pills */}
+          {variants.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold mb-2">Select Variant</h3>
+              <div className="flex gap-3 mb-4">
+                {variants.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setSelectedVariantId(v.id)}
+                    className={`px-4 py-2 rounded-md text-sm border ${selectedVariantId === v.id ? "bg-blue-500 text-white border-transparent" : "bg-gray-800 text-white border-gray-700"}`}
+                  >
+                    <div className="font-medium">{v.name}</div>
+                    <div className="text-xs text-gray-300">₹{v.price}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-					<button style={{ backgroundColor: selectedPlanId ? "#2b6cff" : "#555", color: "#fff", padding: "14px 16px", borderRadius: "8px", width: "100%", border: "none", cursor: selectedPlanId ? "pointer" : "not-allowed", fontSize: "16px", fontWeight: "600", transition: "background-color 200ms ease" }}>
-						{selectedPlanId ? "Proceed with EMI" : "Select a Plan to Proceed"}
-					</button>
-				</div>
-			</div>
-		</div>
-	);
+          <h2 className="text-lg font-bold mb-4">EMI Plans</h2>
+
+          <div className="flex flex-col gap-4 mb-6">
+            {emiPlans.length > 0 ? (
+              emiPlans.map((plan) => {
+                const monthly = typeof plan.monthlyPayment === "number" ? plan.monthlyPayment : Number(plan.monthlyPayment || 0);
+                const isSelected = selectedPlanId === plan.id;
+                return (
+                  <button
+                    key={plan.id}
+                    onClick={() => setSelectedPlanId(plan.id)}
+                    className={`text-left p-4 rounded-md border w-full ${isSelected ? "border-blue-500 bg-blue-500/10" : "border-gray-700 bg-gray-900"}`}
+                  >
+                    <div className="font-semibold text-base">Monthly: ₹{Math.round(monthly)}</div>
+                    <div className="text-sm text-gray-400">Tenure: {plan.tenureMonths} months</div>
+                    <div className="text-sm text-gray-400">Interest: {plan.interestRate}%</div>
+                    {plan.cashback && <div className="text-sm text-green-400 mt-2">{plan.cashback}</div>}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="text-gray-400">No EMI plans available</div>
+            )}
+          </div>
+
+          <button
+            className={`w-full py-3 rounded-md text-white font-semibold ${selectedPlanId ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"}`}
+            disabled={!selectedPlanId}
+          >
+            {selectedPlanId ? "Proceed with EMI" : "Select a Plan to Proceed"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
