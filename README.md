@@ -41,5 +41,4 @@ npm run preview
 Notes
 - The frontend expects the API at the endpoints used in `src/api/productApi.ts`. If you run a local backend, ensure its base URL/config is correct.
 - Many components use Tailwind utility classes. If you do not see expected styles at runtime, ensure the Tailwind config exists and `src/index.css` contains the `@tailwind` directives, then restart the dev server.
-- If you run into TypeScript errors referencing unused variables, remove or update the code that declares them (I removed an unused `columns` state in `src/pages/Home.tsx`).
 
