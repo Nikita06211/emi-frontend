@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+## Project setup (how to run locally)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Follow these steps to get the project running locally. Commands assume PowerShell on Windows (the default shell in this workspace).
 
-Currently, two official plugins are available:
+Prerequisites
+- Node.js 16+ installed (LTS recommended)
+- npm available (bundled with Node)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Install dependencies
+```powershell
+cd C:\Users\ADMIN\Desktop\emi-frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Tailwind CSS (project already has packages installed). If Tailwind isn't configured yet, run these to initialize and add the directives:
+```powershell
+# initialize tailwind config and postcss
+npx tailwindcss init -p
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# then add the directives to your main CSS (src/index.css):
+# @tailwind base;
+# @tailwind components;
+# @tailwind utilities;
 ```
+
+Dev server
+```powershell
+npm run dev
+```
+
+Build for production
+```powershell
+npm run build
+```
+
+Preview production build locally
+```powershell
+npm run preview
+```
+
+Notes
+- The frontend expects the API at the endpoints used in `src/api/productApi.ts`. If you run a local backend, ensure its base URL/config is correct.
+- Many components use Tailwind utility classes. If you do not see expected styles at runtime, ensure the Tailwind config exists and `src/index.css` contains the `@tailwind` directives, then restart the dev server.
+- If you run into TypeScript errors referencing unused variables, remove or update the code that declares them (I removed an unused `columns` state in `src/pages/Home.tsx`).
+
